@@ -1,0 +1,21 @@
+[Unit]
+Description=Grafana to Nextcloud Talk Bridge
+After=network.target
+
+[Service]
+User=grafana-talk
+Group=grafana-talk
+
+WorkingDirectory=/opt/grafana-talk-bridge
+
+EnvironmentFile=/etc/grafana-talk-bridge.env
+
+ExecStart=/usr/bin/python3 /opt/grafana-talk-bridge/app.py
+
+Restart=always
+RestartSec=5
+
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
