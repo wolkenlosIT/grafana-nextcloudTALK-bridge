@@ -69,42 +69,28 @@ sudo systemctl status grafana-talk-bridge.service
 ```shell
 curl -i http://127.0.0.1:8790/health
 ```
-12. With this. We can move to one of our proxmox servers!
+12. With this. We can move to our grafana server!
 
 ### Grafana setup
-1. Log into your Grafana and click on Alert
-2. Scroll down and click on Notifications
-3. Under "Notification Targets" click on "Add" and select "Webhook"
-![proxmoxwebhooksetup1](https://github.com/wolkenlosIT/proxmox-nextcloudTALK-bridge/blob/main/setupimages/proxmoxwebhooksetup1.jpg)
-4. Add a Endpoint name. Whatever you like
-5. Under "Method/URL" select "POST" and add your lxc/vm url in the following format: http://SWAP_WITH_YOUR_LXC_IP_ADRESS:8788/proxmox
-6. Under Headers add a Header with the key: "X-Proxmox-Webhook-Secret" and the value, which is the webhook secret you created in the last part.
-7. Copy and paste the following into "Body":
-```shell
-{
-"title":"{{ escape title }}",
-"message":"{{ escape message }}",
-"severity":"{{ escape severity }}",
-"timestamp":{{ timestamp }},
-"fields":{{ json fields }}
-}
-```
+1. Log into your Grafana. Then click on "Alerting" and "Manage contact points"
+![grafanawebhooksetup1](https://github.com/wolkenlosIT/grafana-nextcloudTALK-bridge/blob/main/setupimages/grafanasetup1.jpg)
+2. Click on "New contact point":
+![grafanawebhooksetup2](https://github.com/wolkenlosIT/grafana-nextcloudTALK-bridge/blob/main/setupimages/grafanasetup2.jpg) 
+3. You can enter whatever under "Name".  As "Integration" select "Webhook" and for "URL" add your lxc/vm url in the following format: http://SWAP_WITH_YOUR_LXC_IP_ADRESS:8790/grafana
+![grafanawebhooksetup3](https://github.com/wolkenlosIT/grafana-nextcloudTALK-bridge/blob/main/setupimages/grafanasetup3.jpg)
+4. The"HTTP Method" is "POST" . Add one "Extra Header" with the "Name": "X-Proxmox-Webhook-Secret" and the value, which is the webhook secret you created in the last part.
+5. Press Test. If everything is working you should have received a message in your Nextcloud Talk room
 8. Safe
-![proxmoxwebhooksetup2](https://github.com/wolkenlosIT/proxmox-nextcloudTALK-bridge/blob/main/setupimages/proxmoxwebhooksetup2.jpg)
-9. Select your Target and click on Test. If everything is working you should have received a message in your Nextcloud Talk room
-10. Under Notification Matcher you can add your newly created webhook target, so that you get all or whatever notifications you desire to your Nextcloud.
-![proxmoxwebhooksetup3](https://github.com/wolkenlosIT/proxmox-nextcloudTALK-bridge/blob/main/setupimages/proxmoxwebhooksetup3.jpg)
-11. If you have multiple PVEs or PBSs, you just simply have to repeat the Proxmox Setup on each of them. There is no change on the lxs/vm or nextcloud. The nextcloud message will always say which server is sending the message
 
 ### Monitor the bridge with Uptime Kuma
 1. Log into your Uptime Kuma
 2. Add a new monitor
 3. For "Monitortyp" select "HTTP(s)"
-4. For the "URL" http://SWAP_WITH_YOUR_LXC_IP_ADRESS:8788/health
+4. For the "URL" http://SWAP_WITH_YOUR_LXC_IP_ADRESS:8790/health
 5. Safe
 
 ##
-I hope you like this! This is my first repo, so feel free to give me advice!
+I hope you like this! 
 You can ask me questions in German too!
 
 
