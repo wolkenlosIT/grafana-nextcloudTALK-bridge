@@ -78,7 +78,7 @@ curl -i http://127.0.0.1:8790/health
 ![grafanawebhooksetup2](https://github.com/wolkenlosIT/grafana-nextcloudTALK-bridge/blob/main/setupimages/grafanasetup2.jpg) 
 3. You can enter whatever under "Name".  As "Integration" select "Webhook" and for "URL" add your lxc/vm url in the following format: http://SWAP_WITH_YOUR_LXC_IP_ADRESS:8790/grafana
 ![grafanawebhooksetup3](https://github.com/wolkenlosIT/grafana-nextcloudTALK-bridge/blob/main/setupimages/grafanasetup3.jpg)
-4. The"HTTP Method" is "POST" . Add one "Extra Header" with the "Name": "X-Proxmox-Webhook-Secret" and the value, which is the webhook secret you created in the last part.
+4. The"HTTP Method" is "POST" . Add one "Extra Header" with the "Name": "X-Grafana-Webhook-Secret" and the value, which is the webhook secret you created in the last part.
 5. Press Test. If everything is working you should have received a message in your Nextcloud Talk room
 8. Safe
 
