@@ -39,7 +39,7 @@ sudo nano /opt/grafana-talk-bridge/app.py
 ```shell
 openssl rand -hex 16
 ```
-6. Copy the secret and let´s create our environments file. Fill it out, too!
+6. Copy the secret and let´s create our environments file. Fill it out, too! Don´t change the port if you don´t know what you are doing!
 ```shell
 sudo nano /etc/grafana-talk-bridge.env
 ```
