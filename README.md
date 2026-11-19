@@ -78,9 +78,10 @@ curl -i http://127.0.0.1:8790/health
 ![grafanawebhooksetup2](https://github.com/wolkenlosIT/grafana-nextcloudTALK-bridge/blob/main/setupimages/grafanasetup2.jpg) 
 3. You can enter whatever under "Name".  As "Integration" select "Webhook" and for "URL" add your lxc/vm url in the following format: http://SWAP_WITH_YOUR_LXC_IP_ADRESS:8790/grafana
 ![grafanawebhooksetup3](https://github.com/wolkenlosIT/grafana-nextcloudTALK-bridge/blob/main/setupimages/grafanasetup3.jpg)
-4. The"HTTP Method" is "POST" . Add one "Extra Header" with the "Name": "X-Grafana-Webhook-Secret" and the value, which is the webhook secret you created in the last part.
+4. The"HTTP Method" is "POST" . Add one "Extra Header" with the "Name": "X-Grafana-Webhook-Secret" and the value, which is the webhook secret you created in the last part. Add other "Extra Header" with the "Name": "X-Nextcloud-Talk-Token" and the value, which is your Nextcloud Talk Room token. 
 5. Press Test. If everything is working you should have received a message in your Nextcloud Talk room
 8. Safe
+9. If you want multiple rooms you have to add multiple Contact Points and change the value of the "Extra Header" with the "Name": "X-Nextcloud-Talk-Token" to the value of the desired Nextcloud Talk Room.
 
 ### Monitor the bridge with Uptime Kuma
 1. Log into your Uptime Kuma
