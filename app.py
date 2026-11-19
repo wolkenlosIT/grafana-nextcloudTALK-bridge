@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
+# Version 2.0
 
 import base64
 import json
 import os
-import time
 import hmac
 import ssl
+import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlparse, parse_qs
 from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
 
 # Variables. Don´t change anything here. Place it in grafana-talk-bridge.env
+
+DEBUG = os.environ["DEBUG"].lower() in ("1", "true", "yes")
+
 LISTEN_HOST = os.environ["LISTEN_HOST"]
 LISTEN_PORT = int(os.environ["LISTEN_PORT"])
 GRAFANA_HOSTS = {
@@ -24,8 +26,8 @@ NEXTCLOUD_URL = os.environ["NEXTCLOUD_URL"].rstrip("/")
 NEXTCLOUD_USER = os.environ["NEXTCLOUD_USER"]
 NEXTCLOUD_APP_PASSWORD = os.environ["NEXTCLOUD_APP_PASSWORD"]
 NEXTCLOUD_TLS_VERIFY = os.environ["NEXTCLOUD_TLS_VERIFY"].lower() in ("1", "true", "yes")
-TALK_TOKEN = os.environ["TALK_TOKEN"]
 WEBHOOK_SECRET = os.environ["WEBHOOK_SECRET"]
+#TALK_TOKEN = os.environ["TALK_TOKEN"] <-- this is now done through a web header in order to use multiple rooms
 
 # TLS certificate verification for the Nextcloud connection
 if NEXTCLOUD_TLS_VERIFY:
@@ -35,10 +37,11 @@ else:
     SSL_CONTEXT = ssl._create_unverified_context()
 
 
-def send_to_talk(message):
+def send_to_talk(message, talk_token):
+
     url = (
         f"{NEXTCLOUD_URL}"
-        f"/ocs/v2.php/apps/spreed/api/v1/chat/{TALK_TOKEN}"
+        f"/ocs/v2.php/apps/spreed/api/v1/chat/{talk_token}"
     )
 
     payload = json.dumps({
@@ -67,18 +70,24 @@ def send_to_talk(message):
         request,
         timeout=15,
         context=SSL_CONTEXT
-    ) as response:
-
+        ) as response:
+        
         body = response.read().decode(
             "utf-8",
             errors="replace"
-        )
-
-        print(
-            f"Nextcloud: HTTP {response.status}: {body}",
-            flush=True
-        )
-
+            )
+        
+        if DEBUG:
+            print(
+                f"Nextcloud: HTTP {response.status}: {body}",
+                flush=True
+            )
+        else:
+            print(
+                f"Nextcloud: HTTP {response.status}",
+                flush=True
+            )
+                
         if response.status not in (200, 201):
             raise RuntimeError(
                 f"Nextcloud returned HTTP {response.status}"
@@ -310,6 +319,39 @@ class Handler(BaseHTTPRequestHandler):
             )
 
             return
+        # Read Nextcloud Talk token from Grafana header
+        
+        talk_token = self.headers.get(
+            "X-Nextcloud-Talk-Token",
+            ""
+        ).strip()
+        
+        
+        # Validate Talk token
+        
+        if (
+            not talk_token
+            or len(talk_token) > 256
+            or not re.fullmatch(
+                r"[a-zA-Z0-9]+",
+                talk_token
+            )
+        ):
+                
+            self.send_json(
+                400,
+                {
+                    "error": "missing or invalid Talk token"
+                }
+            )
+                    
+            return
+        
+        if DEBUG:
+            print(
+                f"Grafana webhook received from {self.client_address[0]}",
+                flush=True
+            )
 
         try:
 
@@ -333,14 +375,15 @@ class Handler(BaseHTTPRequestHandler):
 
             return
 
-        print(
-            "Received Grafana notification:",
-            json.dumps(
-                data,
-                indent=2
-            ),
-            flush=True
-        )
+        if DEBUG:
+            print(
+                "Received Grafana notification:",
+                json.dumps(
+                        data,
+                        indent=2
+                ),
+                flush=True
+            )
 
         try:
 
@@ -349,7 +392,8 @@ class Handler(BaseHTTPRequestHandler):
             )
 
             send_to_talk(
-                message
+                message,
+                talk_token
             )
 
             self.send_json(
